@@ -1,0 +1,128 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Mis Listas - MyList{% endblock %}
+
+{% block content %}
+<div class="mb-8">
+    <h1 class="text-3xl font-bold mb-4">Mis Listas</h1>
+    
+    <!-- Estadísticas -->
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+        <div class="bg-white p-4 rounded-lg shadow">
+            <div class="text-2xl font-bold text-gray-800">{{ stats.total }}</div>
+            <div class="text-gray-600 text-sm">Total</div>
+        </div>
+        <div class="bg-white p-4 rounded-lg shadow">
+            <div class="text-2xl font-bold text-gray-500">{{ stats.pendiente }}</div>
+            <div class="text-gray-600 text-sm">Pendiente</div>
+        </div>
+        <div class="bg-white p-4 rounded-lg shadow">
+            <div class="text-2xl font-bold text-blue-500">{{ stats.en_curso }}</div>
+            <div class="text-gray-600 text-sm">En Curso</div>
+        </div>
+        <div class="bg-white p-4 rounded-lg shadow">
+            <div class="text-2xl font-bold text-green-500">{{ stats.terminado }}</div>
+            <div class="text-gray-600 text-sm">Terminado</div>
+        </div>
+        <div class="bg-white p-4 rounded-lg shadow">
+            <div class="text-2xl font-bold text-red-500">{{ stats.abandonado }}</div>
+            <div class="text-gray-600 text-sm">Abandonado</div>
+        </div>
+    </div>
+    
+    <!-- Filtros -->
+    <div class="bg-white p-4 rounded-lg shadow mb-6">
+        <form method="get" class="flex flex-wrap gap-4">
+            <div class="flex-1 min-w-[200px]">
+                <input type="text" name="search" value="{{ request.GET.search }}" 
+                       placeholder="Buscar por título o notas..." 
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+            </div>
+            
+            <select name="category" class="px-4 py-2 border border-gray-300 rounded-lg">
+                <option value="">Todas las categorías</option>
+                {% for value, label in categories %}
+                    <option value="{{ value }}" {% if request.GET.category == value %}selected{% endif %}>
+                        {{ label }}
+                    </option>
+                {% endfor %}
+            </select>
+            
+            <select name="status" class="px-4 py-2 border border-gray-300 rounded-lg">
+                <option value="">Todos los estados</option>
+                {% for value, label in statuses %}
+                    <option value="{{ value }}" {% if request.GET.status == value %}selected{% endif %}>
+                        {{ label }}
+                    </option>
+                {% endfor %}
+            </select>
+            
+            <button type="submit" class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700">
+                Filtrar
+            </button>
+            <a href="{% url 'entry_list' %}" class="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-300">
+                Limpiar
+            </a>
+        </form>
+    </div>
+</div>
+
+<!-- Lista de entradas -->
+{% if entries %}
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for entry in entries %}
+            <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                <div class="p-6">
+                    <div class="flex justify-between items-start mb-3">
+                        <h3 class="text-xl font-bold text-gray-800">{{ entry.title }}</h3>
+                        <span class="{{ entry.status_badge_color }} text-white text-xs px-2 py-1 rounded-full">
+                            {{ entry.get_status_display }}
+                        </span>
+                    </div>
+                    
+                    <div class="space-y-2 text-sm text-gray-600 mb-4">
+                        <p><strong>Categoría:</strong> {{ entry.get_category_display }}</p>
+                        {% if entry.platform %}
+                            <p><strong>Plataforma:</strong> {{ entry.platform }}</p>
+                        {% endif %}
+                        {% if entry.progress %}
+                            <p><strong>Progreso:</strong> {{ entry.progress }}</p>
+                        {% endif %}
+                        {% if entry.rating %}
+                            <p><strong>Calificación:</strong> ⭐ {{ entry.rating }}/10</p>
+                        {% endif %}
+                    </div>
+                    
+                    {% if entry.tags.all %}
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            {% for tag in entry.tags.all %}
+                                <span class="text-xs px-2 py-1 rounded" style="background-color: blue; color: blue;">
+                                    {{ tag.name }}
+                                </span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    
+                    <div class="flex gap-2">
+                        <a href="{% url 'entry_detail' entry.pk %}" 
+                           class="flex-1 text-center bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">
+                            Ver
+                        </a>
+                        <a href="{% url 'entry_update' entry.pk %}" 
+                           class="flex-1 text-center bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300">
+                            Editar
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="text-center py-12 bg-white rounded-lg shadow">
+        <p class="text-gray-600 text-lg mb-4">No tienes entradas aún</p>
+        <a href="{% url 'entry_create' %}" class="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 inline-block">
+            Crear tu primera entrada
+        </a>
+    </div>
+{% endif %}
+{% endblock %}

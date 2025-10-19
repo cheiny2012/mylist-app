@@ -1,0 +1,110 @@
+{% extends 'base/base.html' %}
+
+{% block title %}{{ action }} Entrada - MyList{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="bg-white rounded-lg shadow-md p-8">
+        <h2 class="text-3xl font-bold mb-6">{{ action }} Entrada</h2>
+        
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="mb-4">
+                <label class="block text-gray-700 font-semibold mb-2">Título *</label>
+                {{ form.title }}
+                {% if form.title.errors %}
+                    <p class="text-red-500 text-sm mt-1">{{ form.title.errors.0 }}</p>
+                {% endif %}
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label class="block text-gray-700 font-semibold mb-2">Categoría *</label>
+                    {{ form.category }}
+                    {% if form.category.errors %}
+                        <p class="text-red-500 text-sm mt-1">{{ form.category.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                
+                <div>
+                    <label class="block text-gray-700 font-semibold mb-2">Estado *</label>
+                    {{ form.status }}
+                    {% if form.status.errors %}
+                        <p class="text-red-500 text-sm mt-1">{{ form.status.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label class="block text-gray-700 font-semibold mb-2">Plataforma</label>
+                    {{ form.platform }}
+                    {% if form.platform.errors %}
+                        <p class="text-red-500 text-sm mt-1">{{ form.platform.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                
+                <div>
+                    <label class="block text-gray-700 font-semibold mb-2">Progreso</label>
+                    {{ form.progress }}
+                    {% if form.progress.errors %}
+                        <p class="text-red-500 text-sm mt-1">{{ form.progress.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="mb-4">
+                <label class="block text-gray-700 font-semibold mb-2">Calificación (1-10)</label>
+                {{ form.rating }}
+                {% if form.rating.errors %}
+                    <p class="text-red-500 text-sm mt-1">{{ form.rating.errors.0 }}</p>
+                {% endif %}
+            </div>
+            
+            <div class="mb-4">
+                <label class="block text-gray-700 font-semibold mb-2">Enlace externo</label>
+                {{ form.external_link }}
+                {% if form.external_link.errors %}
+                    <p class="text-red-500 text-sm mt-1">{{ form.external_link.errors.0 }}</p>
+                {% endif %}
+            </div>
+            
+            <div class="mb-4">
+                <label class="block text-gray-700 font-semibold mb-2">Notas</label>
+                {{ form.notes }}
+                {% if form.notes.errors %}
+                    <p class="text-red-500 text-sm mt-1">{{ form.notes.errors.0 }}</p>
+                {% endif %}
+            </div>
+            
+            <div class="mb-6">
+                <label class="block text-gray-700 font-semibold mb-2">Etiquetas</label>
+                <div class="space-y-2">
+                    {% for tag in form.tags %}
+                        <label class="flex items-center">
+                            {{ tag.tag }}
+                            <span class="ml-2">{{ tag.choice_label }}</span>
+                        </label>
+                    {% endfor %}
+                </div>
+                <a href="{% url 'tag_list' %}" class="text-indigo-600 hover:text-indigo-700 text-sm mt-2 inline-block">
+                    Gestionar etiquetas →
+                </a>
+                {% if form.tags.errors %}
+                    <p class="text-red-500 text-sm mt-1">{{ form.tags.errors.0 }}</p>
+                {% endif %}
+            </div>
+            
+            <div class="flex gap-4">
+                <button type="submit" class="flex-1 bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 font-semibold">
+                    {{ action }} Entrada
+                </button>
+                <a href="{% url 'entry_list' %}" class="flex-1 text-center bg-gray-200 text-gray-700 py-2 rounded-lg hover:bg-gray-300 font-semibold">
+                    Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

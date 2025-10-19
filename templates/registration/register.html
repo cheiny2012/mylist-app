@@ -1,0 +1,70 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Registro - MyList{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto">
+    <div class="bg-white rounded-lg shadow-md p-8">
+        <h2 class="text-3xl font-bold text-center mb-6">Crear Cuenta</h2>
+        
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="mb-4">
+                <label class="block text-gray-700 font-semibold mb-2">Usuario</label>
+                <input type="text" name="username" required 
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                       placeholder="Nombre de usuario">
+                {% if form.username.errors %}
+                    <p class="text-red-500 text-sm mt-1">{{ form.username.errors.0 }}</p>
+                {% endif %}
+                <p class="text-gray-500 text-sm mt-1">Requerido. 150 caracteres o menos.</p>
+            </div>
+            
+            <div class="mb-4">
+                <label class="block text-gray-700 font-semibold mb-2">Email</label>
+                <input type="email" name="email" required
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                       placeholder="tu@email.com">
+                {% if form.email.errors %}
+                    <p class="text-red-500 text-sm mt-1">{{ form.email.errors.0 }}</p>
+                {% endif %}
+            </div>
+            
+            <div class="mb-4">
+                <label class="block text-gray-700 font-semibold mb-2">Contraseña</label>
+                <input type="password" name="password1" required
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                       placeholder="Contraseña">
+                {% if form.password1.errors %}
+                    <p class="text-red-500 text-sm mt-1">{{ form.password1.errors.0 }}</p>
+                {% endif %}
+                <p class="text-gray-500 text-sm mt-1">Mínimo 8 caracteres. No puede ser común ni solo números.</p>
+            </div>
+            
+            <div class="mb-6">
+                <label class="block text-gray-700 font-semibold mb-2">Confirmar contraseña</label>
+                <input type="password" name="password2" required
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                       placeholder="Confirmar contraseña">
+                {% if form.password2.errors %}
+                    <p class="text-red-500 text-sm mt-1">{{ form.password2.errors.0 }}</p>
+                {% endif %}
+            </div>
+            
+            <button type="submit" class="w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 font-semibold">
+                Registrarse
+            </button>
+        </form>
+        
+        <div class="text-center mt-4">
+            <p class="text-gray-600">
+                ¿Ya tienes cuenta? 
+                <a href="{% url 'login' %}" class="text-indigo-600 hover:text-indigo-700 font-semibold">
+                    Inicia sesión aquí
+                </a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

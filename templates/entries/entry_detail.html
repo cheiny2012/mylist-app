@@ -1,0 +1,134 @@
+{% extends 'base/base.html' %}
+
+{% block title %}{{ entry.title }} - MyList{% endblock %}
+
+{% block content %}
+<article class="max-w-4xl mx-auto">
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="p-8">
+            <!-- Header -->
+            <div class="flex justify-between items-start mb-6">
+                <div>
+                    <h1 class="text-4xl font-bold text-gray-900 mb-2">{{ entry.title|default:"Sin título" }}</h1>
+                    <span class="{{ entry.status_badge_color }} text-white px-3 py-1 rounded-full text-sm"
+                        role="status">
+                        {{ entry.get_status_display }}
+                    </span>
+                </div>
+                <div class="flex gap-2">
+                    <a href="{% url 'entry_update' entry.pk %}"
+                        class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500"
+                        aria-label="Editar {{ entry.title }}">
+                        Editar
+                    </a>
+                    <a href="{% url 'entry_delete' entry.pk %}"
+                        class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 focus:ring-2 focus:ring-red-500"
+                        aria-label="Eliminar {{ entry.title }}">
+                        Eliminar
+                    </a>
+                </div>
+            </div>
+
+            <!-- Información Principal -->
+            <div class="grid md:grid-cols-2 gap-6 mb-6">
+                <dl class="space-y-4">
+                    <div>
+                        <dt class="text-gray-600 font-semibold mb-1">Categoría</dt>
+                        <dd class="text-lg">{{ entry.get_category_display|default:"No especificada" }}</dd>
+                    </div>
+
+                    {% if entry.platform %}
+                    <div>
+                        <dt class="text-gray-600 font-semibold mb-1">Plataforma</dt>
+                        <dd class="text-lg">{{ entry.platform }}</dd>
+                    </div>
+                    {% endif %}
+
+                    {% if entry.progress %}
+                    <div>
+                        <dt class="text-gray-600 font-semibold mb-1">Progreso</dt>
+                        <dd class="text-lg">{{ entry.progress }}</dd>
+                    </div>
+                    {% endif %}
+                </dl>
+
+                <dl class="space-y-4">
+                    {% if entry.rating %}
+                    <div>
+                        <dt class="text-gray-600 font-semibold mb-1">Calificación</dt>
+                        <dd class="text-lg flex items-center gap-1">
+                            <span aria-hidden="true">⭐</span>
+                            <span>{{ entry.rating }}/10</span>
+                        </dd>
+                    </div>
+                    {% endif %}
+
+                    {% if entry.external_link %}
+                    <div>
+                        <dt class="text-gray-600 font-semibold mb-1">Enlace externo</dt>
+                        <dd>
+                            <a href="{{ entry.external_link }}" target="_blank" rel="noopener noreferrer"
+                                class="text-indigo-600 hover:text-indigo-700 focus:ring-2 focus:ring-indigo-500 inline-flex items-center gap-1">
+                                Ver en plataforma externa
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                </svg>
+                            </a>
+                        </dd>
+                    </div>
+                    {% endif %}
+
+                    <div>
+                        <dt class="text-gray-600 font-semibold mb-1">Actualizado</dt>
+                        <dd class="text-sm text-gray-500">
+                            <time datetime="{{ entry.updated_at|date:'Y-m-d H:i' }}">
+                                {{ entry.updated_at|date:"d/m/Y H:i" }}
+                            </time>
+                        </dd>
+                    </div>
+                </dl>
+            </div>
+
+            <!-- Etiquetas -->
+            {% if entry.tags.all %}
+            <section class="mb-6" aria-labelledby="tags-heading">
+                <h2 id="tags-heading" class="text-gray-600 font-semibold mb-2">Etiquetas</h2>
+                <ul class="flex flex-wrap gap-2" role="list">
+                    {% for tag in entry.tags.all %}
+                    <li>
+                        <span class="px-3 py-1 rounded-full text-sm font-medium"
+                            style="background-color: 20; color: blue;">
+                            {{ tag.name }}
+                        </span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </section>
+            {% endif %}
+
+            <!-- Notas -->
+            {% if entry.notes %}
+            <section class="mb-6" aria-labelledby="notes-heading">
+                <h2 id="notes-heading" class="text-gray-600 font-semibold mb-2">Notas</h2>
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <p class="text-gray-700 whitespace-pre-line">{{ entry.notes }}</p>
+                </div>
+            </section>
+            {% endif %}
+
+            <!-- Botón volver -->
+            <div class="mt-8 pt-6 border-t">
+                <a href="{% url 'entry_list' %}"
+                    class="text-indigo-600 hover:text-indigo-700 font-semibold focus:ring-2 focus:ring-indigo-500 inline-flex items-center gap-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                    Volver a mis listas
+                </a>
+            </div>
+        </div>
+    </div>
+</article>
+{% endblock %}

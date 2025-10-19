@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: mylist-app
+    runtime: python
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn config.wsgi:application"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: False
+      - key: DATABASE_URL
+        fromDatabase:
+          name: mylist-db
+          property: connectionString
+
+databases:
+  - name: mylist-db
+    databaseName: mylist
+    user: mylist

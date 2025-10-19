@@ -1,0 +1,60 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Inicio - MyList{% endblock %}
+
+{% block content %}
+<div class="text-center py-12">
+    <h1 class="text-5xl font-bold text-gray-900 mb-4">
+        📚 Bienvenido a MyList
+    </h1>
+    <p class="text-xl text-gray-600 mb-8">
+        Organiza tus animes, series, películas, mangas, manhwas, libros y videojuegos en un solo lugar
+    </p>
+    
+    {% if user.is_authenticated %}
+        <a href="{% url 'entry_list' %}" class="bg-indigo-600 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-indigo-700 inline-block">
+            Ver mis listas
+        </a>
+    {% else %}
+        <div class="space-x-4">
+            <a href="{% url 'register' %}" class="bg-indigo-600 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-indigo-700 inline-block">
+                Comenzar gratis
+            </a>
+            <a href="{% url 'login' %}" class="bg-gray-200 text-gray-800 px-8 py-3 rounded-lg text-lg font-semibold hover:bg-gray-300 inline-block">
+                Iniciar sesión
+            </a>
+        </div>
+    {% endif %}
+</div>
+
+<div class="grid md:grid-cols-3 gap-8 mt-16">
+    <div class="bg-white p-6 rounded-lg shadow-md text-center">
+        <div class="text-4xl mb-4">🎬</div>
+        <h3 class="text-xl font-bold mb-2">Anime & Series</h3>
+        <p class="text-gray-600">Lleva el control de lo que estás viendo y lo que quieres ver</p>
+    </div>
+    
+    <div class="bg-white p-6 rounded-lg shadow-md text-center">
+        <div class="text-4xl mb-4">📚</div>
+        <h3 class="text-xl font-bold mb-2">Mangas & Libros</h3>
+        <p class="text-gray-600">Organiza tus lecturas y marca tu progreso</p>
+    </div>
+    
+    <div class="bg-white p-6 rounded-lg shadow-md text-center">
+        <div class="text-4xl mb-4">🎮</div>
+        <h3 class="text-xl font-bold mb-2">Videojuegos</h3>
+        <p class="text-gray-600">Gestiona tu biblioteca de juegos pendientes y completados</p>
+    </div>
+</div>
+
+<div class="mt-16 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-lg p-8 text-white">
+    <h2 class="text-3xl font-bold mb-4">Características principales</h2>
+    <ul class="space-y-3 text-lg">
+        <li>✅ Categoriza por tipo de contenido</li>
+        <li>✅ Marca estados: pendiente, en curso, terminado, abandonado</li>
+        <li>✅ Añade etiquetas personalizadas</li>
+        <li>✅ Registra tu progreso y calificación</li>
+        <li>✅ Enlaces directos a tus plataformas favoritas</li>
+    </ul>
+</div>
+{% endblock %}
