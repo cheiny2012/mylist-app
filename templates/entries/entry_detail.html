@@ -44,12 +44,25 @@
                     </div>
                     {% endif %}
 
-                    {% if entry.progress %}
-                    <div>
-                        <dt class="text-gray-600 font-semibold mb-1">Progreso</dt>
-                        <dd class="text-lg">{{ entry.progress }}</dd>
-                    </div>
-                    {% endif %}
+{% if entry.progress_total %}
+<div>
+    <h3 class="text-gray-600 font-semibold mb-1">Progreso</h3>
+    <p class="text-lg mb-2">{{ entry.progress_current }}/{{ entry.progress_total }} episodios</p>
+    <div class="w-full bg-gray-200 rounded-full h-3">
+        <div class="bg-indigo-600 h-3 rounded-full transition-all" 
+             style="width: {% widthratio entry.progress_current entry.progress_total 100 %}%">
+        </div>
+    </div>
+    <p class="text-sm text-gray-500 mt-1">
+        {% widthratio entry.progress_current entry.progress_total 100 %}% completado
+    </p>
+</div>
+{% elif entry.progress_current > 0 %}
+<div>
+    <h3 class="text-gray-600 font-semibold mb-1">Progreso</h3>
+    <p class="text-lg">{{ entry.progress_current }} episodios vistos</p>
+</div>
+{% endif %}
                 </dl>
 
                 <dl class="space-y-4">

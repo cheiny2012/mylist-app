@@ -1,61 +1,71 @@
 {% extends 'base/base.html' %}
 
-{% block title %}{{ action }} Entrada - MyList{% endblock %}
+{% block title %}Editar {{ entry.title }} - MyList{% endblock %}
 
 {% block content %}
 <div class="max-w-2xl mx-auto">
     <div class="bg-white rounded-lg shadow-md p-8">
-        <h2 class="text-3xl font-bold mb-6">{{ action }} Entrada</h2>
+        <!-- Mostrar portada si existe -->
+        {% if entry.cover_image %}
+        <div class="mb-6">
+            <img src="{{ entry.cover_image }}" alt="{{ entry.title }}" 
+                 class="w-full h-64 object-cover rounded-lg">
+        </div>
+        {% endif %}
+        
+        <h2 class="text-3xl font-bold mb-2">{{ entry.title }}</h2>
+        <p class="text-gray-600 mb-6">
+            <span class="text-sm">{{ entry.get_category_display }}</span>
+            {% if entry.external_link %}
+                • <a href="{{ entry.external_link }}" target="_blank" class="text-indigo-600 hover:underline">Ver en AniList</a>
+            {% endif %}
+        </p>
         
         <form method="post">
             {% csrf_token %}
             
             <div class="mb-4">
-                <label class="block text-gray-700 font-semibold mb-2">Título *</label>
-                {{ form.title }}
-                {% if form.title.errors %}
-                    <p class="text-red-500 text-sm mt-1">{{ form.title.errors.0 }}</p>
+                <label class="block text-gray-700 font-semibold mb-2">Estado *</label>
+                {{ form.status }}
+                {% if form.status.errors %}
+                    <p class="text-red-500 text-sm mt-1">{{ form.status.errors.0 }}</p>
                 {% endif %}
             </div>
             
             <div class="grid md:grid-cols-2 gap-4 mb-4">
                 <div>
-                    <label class="block text-gray-700 font-semibold mb-2">Categoría *</label>
-                    {{ form.category }}
-                    {% if form.category.errors %}
-                        <p class="text-red-500 text-sm mt-1">{{ form.category.errors.0 }}</p>
+                    <label class="block text-gray-700 font-semibold mb-2">Episodios vistos</label>
+                    {{ form.progress_current }}
+                    {% if form.progress_current.errors %}
+                        <p class="text-red-500 text-sm mt-1">{{ form.progress_current.errors.0 }}</p>
                     {% endif %}
                 </div>
                 
                 <div>
-                    <label class="block text-gray-700 font-semibold mb-2">Estado *</label>
-                    {{ form.status }}
-                    {% if form.status.errors %}
-                        <p class="text-red-500 text-sm mt-1">{{ form.status.errors.0 }}</p>
+                    <label class="block text-gray-700 font-semibold mb-2">Total de episodios</label>
+                    {{ form.progress_total }}
+                    {% if form.progress_total.errors %}
+                        <p class="text-red-500 text-sm mt-1">{{ form.progress_total.errors.0 }}</p>
                     {% endif %}
+                    <p class="text-gray-500 text-xs mt-1">Déjalo en blanco si no se conoce</p>
                 </div>
             </div>
             
-            <div class="grid md:grid-cols-2 gap-4 mb-4">
-                <div>
-                    <label class="block text-gray-700 font-semibold mb-2">Plataforma</label>
-                    {{ form.platform }}
-                    {% if form.platform.errors %}
-                        <p class="text-red-500 text-sm mt-1">{{ form.platform.errors.0 }}</p>
-                    {% endif %}
+            {% if entry.progress_total %}
+            <div class="mb-4">
+                <div class="w-full bg-gray-200 rounded-full h-3">
+                    <div class="bg-indigo-600 h-3 rounded-full transition-all" 
+                         style="width: {% widthratio entry.progress_current entry.progress_total 100 %}%">
+                    </div>
                 </div>
-                
-                <div>
-                    <label class="block text-gray-700 font-semibold mb-2">Progreso</label>
-                    {{ form.progress }}
-                    {% if form.progress.errors %}
-                        <p class="text-red-500 text-sm mt-1">{{ form.progress.errors.0 }}</p>
-                    {% endif %}
-                </div>
+                <p class="text-sm text-gray-600 mt-1 text-center">
+                    {% widthratio entry.progress_current entry.progress_total 100 %}% completado
+                </p>
             </div>
+            {% endif %}
             
             <div class="mb-4">
-                <label class="block text-gray-700 font-semibold mb-2">Calificación (1-10)</label>
+                <label class="block text-gray-700 font-semibold mb-2">{{ form.rating.label }}</label>
                 {{ form.rating }}
                 {% if form.rating.errors %}
                     <p class="text-red-500 text-sm mt-1">{{ form.rating.errors.0 }}</p>
@@ -63,15 +73,7 @@
             </div>
             
             <div class="mb-4">
-                <label class="block text-gray-700 font-semibold mb-2">Enlace externo</label>
-                {{ form.external_link }}
-                {% if form.external_link.errors %}
-                    <p class="text-red-500 text-sm mt-1">{{ form.external_link.errors.0 }}</p>
-                {% endif %}
-            </div>
-            
-            <div class="mb-4">
-                <label class="block text-gray-700 font-semibold mb-2">Notas</label>
+                <label class="block text-gray-700 font-semibold mb-2">{{ form.notes.label }}</label>
                 {{ form.notes }}
                 {% if form.notes.errors %}
                     <p class="text-red-500 text-sm mt-1">{{ form.notes.errors.0 }}</p>
@@ -79,7 +81,7 @@
             </div>
             
             <div class="mb-6">
-                <label class="block text-gray-700 font-semibold mb-2">Etiquetas</label>
+                <label class="block text-gray-700 font-semibold mb-2">{{ form.tags.label }}</label>
                 <div class="space-y-2">
                     {% for tag in form.tags %}
                         <label class="flex items-center">
@@ -98,13 +100,39 @@
             
             <div class="flex gap-4">
                 <button type="submit" class="flex-1 bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 font-semibold">
-                    {{ action }} Entrada
+                    Guardar cambios
                 </button>
-                <a href="{% url 'entry_list' %}" class="flex-1 text-center bg-gray-200 text-gray-700 py-2 rounded-lg hover:bg-gray-300 font-semibold">
+                <a href="{% url 'entry_detail' entry.pk %}" class="flex-1 text-center bg-gray-200 text-gray-700 py-2 rounded-lg hover:bg-gray-300 font-semibold">
                     Cancelar
                 </a>
             </div>
         </form>
     </div>
 </div>
+
+<script>
+// Auto-actualizar la barra de progreso cuando cambie el número
+const progressInput = document.querySelector('input[name="progress_current"]');
+const totalInput = document.querySelector('input[name="progress_total"]');
+
+function updateProgressBar() {
+    const current = parseInt(progressInput.value) || 0;
+    const total = parseInt(totalInput.value) || 0;
+    
+    if (total > 0) {
+        const percentage = Math.min((current / total) * 100, 100);
+        const progressBar = document.querySelector('.bg-indigo-600');
+        if (progressBar) {
+            progressBar.style.width = percentage + '%';
+        }
+    }
+}
+
+if (progressInput) {
+    progressInput.addEventListener('input', updateProgressBar);
+}
+if (totalInput) {
+    totalInput.addEventListener('input', updateProgressBar);
+}
+</script>
 {% endblock %}

@@ -45,7 +45,8 @@ class Entry(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pendiente')
     
     platform = models.CharField(max_length=100, blank=True)
-    progress = models.CharField(max_length=100, blank=True)
+    progress_current = models.IntegerField(default=0, verbose_name='Progreso actual')
+    progress_total = models.IntegerField(null=True, blank=True, verbose_name='Total')
     rating = models.IntegerField(null=True, blank=True)
     notes = models.TextField(blank=True)
     external_link = models.URLField(blank=True)

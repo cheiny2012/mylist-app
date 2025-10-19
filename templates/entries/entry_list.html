@@ -85,8 +85,13 @@
                         {% if entry.platform %}
                             <p><strong>Plataforma:</strong> {{ entry.platform }}</p>
                         {% endif %}
-                        {% if entry.progress %}
-                            <p><strong>Progreso:</strong> {{ entry.progress }}</p>
+                        {% if entry.progress_total %}
+                            <p><strong>Progreso:</strong> {{ entry.progress_current }}/{{ entry.progress_total }} episodios</p>
+                            <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
+                                <div class="bg-indigo-600 h-2 rounded-full" style="width: {% widthratio entry.progress_current entry.progress_total 100 %}%"></div>
+                            </div>
+                        {% elif entry.progress_current > 0 %}
+                            <p><strong>Progreso:</strong> {{ entry.progress_current }} episodios</p>
                         {% endif %}
                         {% if entry.rating %}
                             <p><strong>Calificación:</strong> ⭐ {{ entry.rating }}/10</p>

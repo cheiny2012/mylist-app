@@ -1,0 +1,198 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Buscar Anime - MyList{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <h1 class="text-3xl font-bold mb-6">Buscar Anime</h1>
+    
+    <!-- Buscador -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div class="relative">
+            <input 
+                type="text" 
+                id="searchInput"
+                placeholder="Buscar anime (ej: Naruto, One Piece, Attack on Titan...)"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 text-lg"
+                autocomplete="off"
+            >
+            <div id="loadingSpinner" class="hidden absolute right-4 top-4">
+                <svg class="animate-spin h-5 w-5 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+            </div>
+        </div>
+        <p class="text-gray-500 text-sm mt-2">Búsqueda en tiempo real desde AniList</p>
+    </div>
+    
+    <!-- Resultados -->
+    <div id="results" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+    
+    <!-- Sin resultados -->
+    <div id="noResults" class="hidden text-center py-12">
+        <p class="text-gray-600 text-lg">No se encontraron resultados</p>
+    </div>
+</div>
+
+<script>
+let searchTimeout;
+const searchInput = document.getElementById('searchInput');
+const results = document.getElementById('results');
+const noResults = document.getElementById('noResults');
+const loadingSpinner = document.getElementById('loadingSpinner');
+
+// Almacenar datos de animes para evitar problemas con caracteres especiales
+let animesData = {};
+
+searchInput.addEventListener('input', function() {
+    clearTimeout(searchTimeout);
+    const query = this.value.trim();
+    
+    if (query.length < 2) {
+        results.innerHTML = '';
+        noResults.classList.add('hidden');
+        return;
+    }
+    
+    loadingSpinner.classList.remove('hidden');
+    
+    searchTimeout = setTimeout(() => {
+        searchAnime(query);
+    }, 500);
+});
+
+async function searchAnime(query) {
+    try {
+        const response = await fetch(`/entries/api/search-anime/?q=${encodeURIComponent(query)}`);
+        const data = await response.json();
+        
+        loadingSpinner.classList.add('hidden');
+        displayResults(data.results);
+    } catch (error) {
+        console.error('Error:', error);
+        loadingSpinner.classList.add('hidden');
+    }
+}
+
+function displayResults(animes) {
+    if (!animes || animes.length === 0) {
+        results.innerHTML = '';
+        noResults.classList.remove('hidden');
+        return;
+    }
+    
+    noResults.classList.add('hidden');
+    
+    // Limpiar y guardar datos
+    animesData = {};
+    
+    results.innerHTML = animes.map((anime, index) => {
+        const animeId = `anime_${index}`;
+        animesData[animeId] = anime;
+        
+        return `
+        <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow">
+            ${anime.cover_image ? `
+                <img src="${anime.cover_image}" 
+                     alt="Cover" 
+                     class="w-full h-64 object-cover"
+                     onerror="this.style.display='none'">
+            ` : ''}
+            <div class="p-4">
+                <h3 class="font-bold text-lg mb-2 line-clamp-2">${escapeHtml(anime.title)}</h3>
+                ${anime.title_english ? `<p class="text-sm text-gray-600 mb-2">${escapeHtml(anime.title_english)}</p>` : ''}
+                
+                <div class="flex flex-wrap gap-1 mb-3">
+                    ${anime.genres.slice(0, 3).map(genre => 
+                        `<span class="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded">${escapeHtml(genre)}</span>`
+                    ).join('')}
+                </div>
+                
+                <div class="text-sm text-gray-600 mb-3">
+                    ${anime.episodes ? `<p>📺 ${anime.episodes} episodios</p>` : ''}
+                    ${anime.score ? `<p>⭐ ${anime.score}/100</p>` : ''}
+                    ${anime.year ? `<p>📅 ${anime.year}</p>` : ''}
+                </div>
+                
+                <div class="flex gap-2">
+                    <button onclick="importAnime('${animeId}')" 
+                            class="flex-1 bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 text-sm">
+                        Añadir a mi lista
+                    </button>
+                    ${anime.url ? `
+                        <a href="${anime.url}" target="_blank" 
+                           class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 text-sm">
+                            Ver más
+                        </a>
+                    ` : ''}
+                </div>
+            </div>
+        </div>
+    `}).join('');
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+async function importAnime(animeId) {
+    const anime = animesData[animeId];
+    
+    if (!anime) {
+        alert('Error: No se encontraron datos del anime');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/entries/api/import-anime/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({
+                anime: {
+                    external_id: anime.external_id,
+                    title: anime.title,
+                    title_english: anime.title_english || '',
+                    cover_image: anime.cover_image || '',
+                    url: anime.url || '',
+                    description: anime.description || '',
+                    episodes: anime.episodes || 0
+                }
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            window.location.href = data.redirect_url;
+        } else {
+            alert('Error al añadir el anime: ' + (data.error || 'Error desconocido'));
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al añadir el anime. Por favor, intenta de nuevo.');
+    }
+}
+
+// Función para obtener el CSRF token
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock %}
