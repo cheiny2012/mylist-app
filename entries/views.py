@@ -145,14 +145,14 @@ def entry_update_json(request, pk):
     entry = get_object_or_404(Entry, pk=pk, user=request.user)
     try:
         data = json.loads(request.body)
-        # Campos permitidos para editar desde el modal
-        allowed = ['title', 'notes', 'progress_current', 'progress_total', 'status', 'platform', 'rating']
+        # Campos permitidos para editar desde el modal (solo lo que la UI permite)
+        allowed = ['notes', 'progress_current', 'status']
         updated = False
         for field in allowed:
             if field in data:
                 val = data.get(field)
                 # Conversión básica
-                if field in ['progress_current', 'progress_total', 'rating'] and val is not None:
+                if field == 'progress_current' and val is not None:
                     try:
                         val = int(val)
                     except Exception:
@@ -200,18 +200,20 @@ def import_anime(request):
             # Limitar longitud
             description = description[:500]
         
-        # Obtener el número de episodios
+        # Obtener el número de episodios o duración si existe
         episodes = anime_data.get('episodes')
+        duration = anime_data.get('duration')
         if episodes and episodes > 0:
             progress_total = int(episodes)
         else:
             progress_total = None
-        
-        # Verificar si ya existe
+
+        # Determinar la fuente y verificar existencia
+        source = anime_data.get('source', 'anilist')
         existing = Entry.objects.filter(
             user=request.user,
             external_id=str(anime_data.get('external_id', '')),
-            external_source='anilist'
+            external_source=source
         ).first()
         
         if existing:
@@ -221,20 +223,28 @@ def import_anime(request):
                 'redirect_url': f'/entries/{existing.id}/'
             }, status=400)
         
-        # Crear entrada
+        # Crear entrada (mapear categoría según la fuente)
+        category = 'anime'
+        platform = 'AniList'
+        if source == 'tvmaze':
+            category = 'serie'
+            platform = 'TVMaze'
+
         entry = Entry.objects.create(
             user=request.user,
             title=title[:255],  # Limitar longitud del título
-            category='anime',
+            category=category,
             status='pendiente',
             external_id=str(anime_data.get('external_id', ''))[:100],
-            external_source='anilist',
+            external_source=source,
             external_link=anime_data.get('url', '')[:200],
             cover_image=anime_data.get('cover_image', '')[:200],
             notes=description,
             progress_current=0,
             progress_total=progress_total,
-            platform='AniList'
+            episodes_count=anime_data.get('episodes') or None,
+            duration_minutes=anime_data.get('duration') or None,
+            platform=platform
         )
         
         messages.success(request, f'¡Anime "{entry.title}" añadido a tu lista!')

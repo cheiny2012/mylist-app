@@ -213,8 +213,10 @@ class TVMazeAPI:
                 results.append({
                     'external_id': str(show.get('id', '')),
                     'title': show.get('name', ''),
-                    'description': (show.get('summary') or '')[:500],
-                    'cover_image': cover,
+          'description': (show.get('summary') or '')[:500],
+          'cover_image': cover,
+          'duration': show.get('runtime'),
+          'episodes': show.get('_links', {}).get('episodes', None),
                     'media_type': 'show',
                     'year': year,
                     'score': show.get('rating', {}).get('average', 0),

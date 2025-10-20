@@ -81,29 +81,15 @@ document.addEventListener('DOMContentLoaded', function(){
         <div style="display:flex;gap:14px;align-items:flex-start;">
           ${data.image_url ? `<img src="${escapeHtml(data.image_url)}" alt="${escapeHtml(data.title)}" style="width:220px;max-height:320px;object-fit:cover;border-radius:6px;">` : ''}
           <div style="flex:1;">
-            <label class="block font-semibold">Título</label>
-            <input name="title" value="${escapeHtml(data.title)}" class="w-full px-3 py-2 border rounded mb-2">
-
             <label class="block font-semibold">Notas / Descripción</label>
             <textarea name="notes" class="w-full px-3 py-2 border rounded mb-2" rows="4">${escapeHtml(data.description)}</textarea>
 
             <div style="display:flex;gap:8px;">
               <div style="flex:1;">
                 <label class="block font-semibold">Progreso actual</label>
-                <input type="number" name="progress_current" value="${escapeHtml(data.progress_current)}" class="w-full px-3 py-2 border rounded">
+                <input type="number" step="1" name="progress_current" value="${escapeHtml(data.progress_current)}" class="w-full px-3 py-2 border rounded">
               </div>
-              <div style="width:110px;">
-                <label class="block font-semibold">Total</label>
-                <input type="number" name="progress_total" value="${escapeHtml(data.progress_total)}" class="w-full px-3 py-2 border rounded">
-              </div>
-              <div style="width:140px;">
-                <label class="block font-semibold">Rating</label>
-                <input type="number" name="rating" min="0" max="10" value="${escapeHtml(data.rating || '')}" class="w-full px-3 py-2 border rounded">
-              </div>
-            </div>
-
-            <div style="display:flex;gap:8px;margin-top:8px;align-items:end;">
-              <div style="flex:1;">
+              <div style="width:160px;">
                 <label class="block font-semibold">Estado</label>
                 <select name="status" class="w-full px-3 py-2 border rounded">
                   <option value="pendiente" ${data.status === 'Pendiente' ? 'selected' : ''}>Pendiente</option>
@@ -112,12 +98,9 @@ document.addEventListener('DOMContentLoaded', function(){
                   <option value="abandonado" ${data.status === 'Abandonado' ? 'selected' : ''}>Abandonado</option>
                 </select>
               </div>
-
-              <div style="width:160px;">
-                <label class="block font-semibold">Plataforma</label>
-                <input name="platform" value="${escapeHtml(data.platform || '')}" class="w-full px-3 py-2 border rounded">
-              </div>
             </div>
+
+            
 
             <div style="margin-top:12px;display:flex;gap:8px;">
               <button id="saveEntryBtn" type="button" class="bg-indigo-600 text-white px-4 py-2 rounded">Guardar cambios</button>
@@ -151,9 +134,10 @@ document.addEventListener('DOMContentLoaded', function(){
       const form = document.getElementById('entryEditForm');
       if(!form) return;
       const id = form.dataset.id;
-      const formData = new FormData(form);
-      const payload = {};
-      formData.forEach((v,k) => { payload[k] = v; });
+  const formData = new FormData(form);
+  const allowed = ['progress_current','status','notes'];
+  const payload = {};
+  formData.forEach((v,k) => { if(allowed.includes(k)) payload[k] = v; });
 
       try{
         const resp = await fetch(`/entries/${id}/update-json/`, {

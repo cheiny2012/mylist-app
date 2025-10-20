@@ -4,7 +4,7 @@
 
 {% block content %}
 <div class="max-w-6xl mx-auto">
-    <h1 class="text-3xl font-bold mb-6">Buscar Anime</h1>
+    <h1 class="text-3xl font-bold mb-6">Buscador</h1>
     
     <!-- Buscador -->
     <div class="bg-white rounded-lg shadow-md p-6 mb-6">
@@ -12,7 +12,7 @@
             <input 
                 type="text" 
                 id="searchInput"
-                placeholder="Buscar anime (ej: Naruto, One Piece, Attack on Titan...)"
+                placeholder="¿En qué estás pensando? (ej: Naruto, Inception, Stranger Things...)"
                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 text-lg"
                 autocomplete="off"
             >
@@ -23,7 +23,7 @@
                 </svg>
             </div>
         </div>
-        <p class="text-gray-500 text-sm mt-2">Búsqueda en tiempo real desde AniList</p>
+    <p class="text-gray-500 text-sm mt-2">Buscador general (resultados combinados)</p>
     </div>
     
     <!-- Resultados -->
@@ -100,8 +100,13 @@ function displayResults(animes) {
                      onerror="this.style.display='none'">
             ` : ''}
             <div class="p-4">
-                <h3 class="font-bold text-lg mb-2 line-clamp-2">${escapeHtml(anime.title)}</h3>
-                ${anime.title_english ? `<p class="text-sm text-gray-600 mb-2">${escapeHtml(anime.title_english)}</p>` : ''}
+                                <div class="flex items-center justify-between mb-2">
+                                    <h3 class="font-bold text-lg line-clamp-2">${escapeHtml(anime.title)}</h3>
+                                    <div class="text-xs px-2 py-1 rounded ${anime.source === 'tvmaze' ? 'bg-green-100 text-green-800' : 'bg-indigo-100 text-indigo-700'}">
+                                        ${anime.source === 'tvmaze' ? 'Serie' : 'Anime'}
+                                    </div>
+                                </div>
+                                ${anime.title_english ? `<p class="text-sm text-gray-600 mb-2">${escapeHtml(anime.title_english)}</p>` : ''}
                 
                 <div class="flex flex-wrap gap-1 mb-3">
                     ${(anime.genres || []).slice(0, 3).map(genre => 
@@ -157,11 +162,13 @@ async function importAnime(animeId) {
                 anime: {
                     external_id: anime.external_id,
                     title: anime.title,
+                    source: anime.source || 'anilist',
                     title_english: anime.title_english || '',
                     cover_image: anime.cover_image || '',
                     url: anime.url || '',
                     description: anime.description || '',
-                    episodes: anime.episodes || 0
+                    episodes: anime.episodes || 0,
+                    duration: anime.duration || null
                 }
             })
         });
@@ -169,7 +176,8 @@ async function importAnime(animeId) {
         const data = await response.json();
         
         if (data.success) {
-            window.location.href = data.redirect_url;
+            // redirigir a la lista principal
+            window.location.href = '/entries/';
         } else {
             alert('Error al añadir el anime: ' + (data.error || 'Error desconocido'));
         }

@@ -47,6 +47,8 @@ class Entry(models.Model):
     platform = models.CharField(max_length=100, blank=True)
     progress_current = models.IntegerField(default=0, verbose_name='Progreso actual')
     progress_total = models.IntegerField(null=True, blank=True, verbose_name='Total')
+    episodes_count = models.IntegerField(null=True, blank=True)
+    duration_minutes = models.IntegerField(null=True, blank=True)
     rating = models.IntegerField(null=True, blank=True)
     notes = models.TextField(blank=True)
     external_link = models.URLField(blank=True)
