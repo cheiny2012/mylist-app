@@ -104,7 +104,7 @@ function displayResults(animes) {
                 ${anime.title_english ? `<p class="text-sm text-gray-600 mb-2">${escapeHtml(anime.title_english)}</p>` : ''}
                 
                 <div class="flex flex-wrap gap-1 mb-3">
-                    ${anime.genres.slice(0, 3).map(genre => 
+                    ${(anime.genres || []).slice(0, 3).map(genre => 
                         `<span class="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded">${escapeHtml(genre)}</span>`
                     ).join('')}
                 </div>

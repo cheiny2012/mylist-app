@@ -1,5 +1,6 @@
 import requests
 from typing import List, Dict, Optional
+from django.conf import settings
 
 
 class AniListAPI:
@@ -177,3 +178,52 @@ class AniListAPI:
         clean = re.sub('<[^<]+?>', '', description)
         # Limitar a 500 caracteres
         return clean[:500] + '...' if len(clean) > 500 else clean
+
+
+class TVMazeAPI:
+    """Servicio para interactuar con TVMaze"""
+    BASE_URL = 'https://api.tvmaze.com'
+
+    @staticmethod
+    def _get_key() -> Optional[str]:
+        return getattr(settings, 'TVMAZE_API_KEY', None)
+
+    @staticmethod
+    def search_shows(query: str, limit: int = 20) -> List[Dict]:
+        """Busca shows en TVMaze usando /search/shows"""
+        params = {'q': query}
+        headers = {}
+        key = TVMazeAPI._get_key()
+        # TVMaze no requiere API key por defecto, pero si se proporciona la incluimos en headers
+        if key:
+            headers['Authorization'] = f'Bearer {key}'
+
+        try:
+            resp = requests.get(f"{TVMazeAPI.BASE_URL}/search/shows", params=params, headers=headers, timeout=10)
+            resp.raise_for_status()
+            data = resp.json()
+            results = []
+            for item in data[:limit]:
+                show = item.get('show', {})
+                image = show.get('image') or {}
+                cover = image.get('original') or image.get('medium') or ''
+                premiered = show.get('premiered') or ''
+                year = premiered.split('-')[0] if premiered else ''
+
+                results.append({
+                    'external_id': str(show.get('id', '')),
+                    'title': show.get('name', ''),
+                    'description': (show.get('summary') or '')[:500],
+                    'cover_image': cover,
+                    'media_type': 'show',
+                    'year': year,
+                    'score': show.get('rating', {}).get('average', 0),
+                    'popularity': show.get('weight', 0),
+                    'url': show.get('url', ''),
+                    'source': 'tvmaze'
+                })
+
+            return results
+        except requests.exceptions.RequestException as e:
+            print(f"Error al buscar en TVMaze: {e}")
+            return []

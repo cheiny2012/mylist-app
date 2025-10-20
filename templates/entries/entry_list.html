@@ -3,123 +3,31 @@
 {% block title %}Mis Listas - MyList{% endblock %}
 
 {% block content %}
-<div class="mb-8">
-    <h1 class="text-3xl font-bold mb-4">Mis Listas</h1>
-    
-    <!-- Estadísticas -->
-    <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
-        <div class="bg-white p-4 rounded-lg shadow">
-            <div class="text-2xl font-bold text-gray-800">{{ stats.total }}</div>
-            <div class="text-gray-600 text-sm">Total</div>
-        </div>
-        <div class="bg-white p-4 rounded-lg shadow">
-            <div class="text-2xl font-bold text-gray-500">{{ stats.pendiente }}</div>
-            <div class="text-gray-600 text-sm">Pendiente</div>
-        </div>
-        <div class="bg-white p-4 rounded-lg shadow">
-            <div class="text-2xl font-bold text-blue-500">{{ stats.en_curso }}</div>
-            <div class="text-gray-600 text-sm">En Curso</div>
-        </div>
-        <div class="bg-white p-4 rounded-lg shadow">
-            <div class="text-2xl font-bold text-green-500">{{ stats.terminado }}</div>
-            <div class="text-gray-600 text-sm">Terminado</div>
-        </div>
-        <div class="bg-white p-4 rounded-lg shadow">
-            <div class="text-2xl font-bold text-red-500">{{ stats.abandonado }}</div>
-            <div class="text-gray-600 text-sm">Abandonado</div>
-        </div>
-    </div>
-    
-    <!-- Filtros -->
-    <div class="bg-white p-4 rounded-lg shadow mb-6">
-        <form method="get" class="flex flex-wrap gap-4">
-            <div class="flex-1 min-w-[200px]">
-                <input type="text" name="search" value="{{ request.GET.search }}" 
-                       placeholder="Buscar por título o notas..." 
-                       class="w-full px-4 py-2 border border-gray-300 rounded-lg">
-            </div>
-            
-            <select name="category" class="px-4 py-2 border border-gray-300 rounded-lg">
-                <option value="">Todas las categorías</option>
-                {% for value, label in categories %}
-                    <option value="{{ value }}" {% if request.GET.category == value %}selected{% endif %}>
-                        {{ label }}
-                    </option>
-                {% endfor %}
-            </select>
-            
-            <select name="status" class="px-4 py-2 border border-gray-300 rounded-lg">
-                <option value="">Todos los estados</option>
-                {% for value, label in statuses %}
-                    <option value="{{ value }}" {% if request.GET.status == value %}selected{% endif %}>
-                        {{ label }}
-                    </option>
-                {% endfor %}
-            </select>
-            
-            <button type="submit" class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700">
-                Filtrar
-            </button>
-            <a href="{% url 'entry_list' %}" class="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-300">
-                Limpiar
-            </a>
-        </form>
-    </div>
-</div>
-
-<!-- Lista de entradas -->
+<!-- Lista de entradas (grid de imágenes) -->
 {% if entries %}
-    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
         {% for entry in entries %}
-            <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-                <div class="p-6">
-                    <div class="flex justify-between items-start mb-3">
-                        <h3 class="text-xl font-bold text-gray-800">{{ entry.title }}</h3>
-                        <span class="{{ entry.status_badge_color }} text-white text-xs px-2 py-1 rounded-full">
-                            {{ entry.get_status_display }}
-                        </span>
-                    </div>
-                    
-                    <div class="space-y-2 text-sm text-gray-600 mb-4">
-                        <p><strong>Categoría:</strong> {{ entry.get_category_display }}</p>
-                        {% if entry.platform %}
-                            <p><strong>Plataforma:</strong> {{ entry.platform }}</p>
-                        {% endif %}
+            <article class="entry-card relative overflow-hidden rounded-lg shadow cursor-pointer bg-white" data-id="{{ entry.pk }}">
+                {% if entry.cover_image %}
+                    <img src="{{ entry.cover_image }}" alt="{{ entry.title }}" class="w-full h-40 object-cover">
+                {% else %}
+                    <div class="w-full h-40 bg-gray-200 flex items-center justify-center text-gray-500">Sin imagen</div>
+                {% endif %}
+                <div class="overlay absolute inset-0 flex flex-col justify-end p-3 bg-gradient-to-t from-black/60 to-transparent opacity-0 transition-opacity">
+                    <div class="text-sm font-semibold text-white truncate">{{ entry.title }}</div>
+                    <div class="mt-2 flex items-center gap-2">
                         {% if entry.progress_total %}
-                            <p><strong>Progreso:</strong> {{ entry.progress_current }}/{{ entry.progress_total }} episodios</p>
-                            <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
-                                <div class="bg-indigo-600 h-2 rounded-full" style="width: {% widthratio entry.progress_current entry.progress_total 100 %}%"></div>
+                            {% widthratio entry.progress_current entry.progress_total 100 as pct %}
+                            <div class="w-20 h-2 bg-white/30 rounded-full overflow-hidden">
+                                <div class="h-2 bg-indigo-500" style="width: {{ pct }}%;"></div>
                             </div>
+                            <div class="text-xs text-white">{{ pct }}%</div>
                         {% elif entry.progress_current > 0 %}
-                            <p><strong>Progreso:</strong> {{ entry.progress_current }} episodios</p>
+                            <div class="text-xs text-white">{{ entry.progress_current }} ep.</div>
                         {% endif %}
-                        {% if entry.rating %}
-                            <p><strong>Calificación:</strong> ⭐ {{ entry.rating }}/10</p>
-                        {% endif %}
-                    </div>
-                    
-                    {% if entry.tags.all %}
-                        <div class="flex flex-wrap gap-2 mb-4">
-                            {% for tag in entry.tags.all %}
-                                <span class="text-xs px-2 py-1 rounded" style="background-color: blue; color: blue;">
-                                    {{ tag.name }}
-                                </span>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                    
-                    <div class="flex gap-2">
-                        <a href="{% url 'entry_detail' entry.pk %}" 
-                           class="flex-1 text-center bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">
-                            Ver
-                        </a>
-                        <a href="{% url 'entry_update' entry.pk %}" 
-                           class="flex-1 text-center bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300">
-                            Editar
-                        </a>
                     </div>
                 </div>
-            </div>
+            </article>
         {% endfor %}
     </div>
 {% else %}

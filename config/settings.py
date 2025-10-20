@@ -93,3 +93,6 @@ AUTH_USER_MODEL = 'users.User'
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'entry_list'
 LOGOUT_REDIRECT_URL = 'login'
+
+
+TVMAZE_API_KEY = os.environ.get('TVMAZE_API_KEY', 'kevOTunTC78GYY3b01mRZHDprP0sSPyC')

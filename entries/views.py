@@ -2,10 +2,11 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Q
+from django.views.decorators.http import require_GET
 from .models import Entry, Tag
 from .forms import EntryForm, TagForm
 from django.http import JsonResponse
-from .api_services import AniListAPI
+from .api_services import AniListAPI, TVMazeAPI
 import json
 
 @login_required
@@ -118,9 +119,56 @@ def search_anime(request):
     
     if not query or len(query) < 2:
         return JsonResponse({'results': []})
-    
-    results = AniListAPI.search_anime(query, limit=10)
-    return JsonResponse({'results': results})
+    # Buscar en AniList y TVMaze, combinar resultados
+    results_anilist = AniListAPI.search_anime(query, limit=8)
+    results_tvmaze = TVMazeAPI.search_shows(query, limit=8)
+
+    # Simple deduplicación: key por (source, external_id)
+    seen = set()
+    combined = []
+    for item in (results_anilist + results_tvmaze):
+        key = (item.get('source'), item.get('external_id'))
+        if key in seen:
+            continue
+        seen.add(key)
+        combined.append(item)
+
+    return JsonResponse({'results': combined})
+
+
+@login_required
+def entry_update_json(request, pk):
+    """Actualizar campos de Entry vía JSON (usado desde el modal)."""
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Método no permitido'}, status=405)
+
+    entry = get_object_or_404(Entry, pk=pk, user=request.user)
+    try:
+        data = json.loads(request.body)
+        # Campos permitidos para editar desde el modal
+        allowed = ['title', 'notes', 'progress_current', 'progress_total', 'status', 'platform', 'rating']
+        updated = False
+        for field in allowed:
+            if field in data:
+                val = data.get(field)
+                # Conversión básica
+                if field in ['progress_current', 'progress_total', 'rating'] and val is not None:
+                    try:
+                        val = int(val)
+                    except Exception:
+                        continue
+                setattr(entry, field, val)
+                updated = True
+
+        if updated:
+            entry.save()
+            return JsonResponse({'success': True})
+        else:
+            return JsonResponse({'error': 'No hay cambios'}, status=400)
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'JSON inválido'}, status=400)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
 
 
 @login_required
@@ -209,3 +257,37 @@ def import_anime(request):
 def search_anime_page(request):
     """Página de búsqueda de anime"""
     return render(request, 'entries/search_anime.html')
+
+@login_required
+@require_GET
+def entry_detail_json(request, pk):
+    """Devuelve datos JSON de una entrada para poblar el modal (solo propietario)."""
+    try:
+        entry = get_object_or_404(Entry, pk=pk, user=request.user)
+        # calcular porcentaje
+        pct = 0
+        if entry.progress_total:
+            try:
+                pct = int((entry.progress_current / entry.progress_total) * 100)
+            except Exception:
+                pct = 0
+
+        data = {
+            'id': entry.id,
+            'title': entry.title,
+            'description': entry.notes or '',
+            'image_url': entry.cover_image or '',
+            'progress_percent': pct,
+            'progress_current': entry.progress_current,
+            'progress_total': entry.progress_total,
+            'status': entry.get_status_display(),
+            'category': entry.get_category_display(),
+            'platform': entry.platform or '',
+            'rating': entry.rating,
+            'external_link': entry.external_link or '',
+        }
+        return JsonResponse(data)
+    except Http404:
+        return JsonResponse({'error': 'No encontrado'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)

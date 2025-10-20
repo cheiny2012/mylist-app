@@ -9,6 +9,9 @@
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
 
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/list.css' %}">
+
     {% block extra_css %}{% endblock %}
 </head>
 
@@ -36,6 +39,16 @@
                     <a href="{% url 'logout' %}" class="text-red-600 hover:text-red-700">
                         Salir
                     </a>
+                    <!-- User dropdown -->
+                    <div class="relative user-menu">
+                        <button id="userDropdown" class="text-gray-600 font-medium focus:outline-none">
+                            {{ user.username }}
+                        </button>
+                        <div id="userDropdownMenu" class="dropdown hidden">
+                            <a href="#" id="open-settings" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Ajustes</a>
+                            <a href="{% url 'logout' %}" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100">Cerrar sesión</a>
+                        </div>
+                    </div>
                 </div>
                 {% else %}
                 <div class="flex items-center space-x-4">
@@ -75,6 +88,24 @@
             <p>&copy; 2025 MyList - Organiza tu contenido favorito</p>
         </div>
     </footer>
+
+    <!-- Modal container -->
+    <div id="itemModal" class="modal hidden" role="dialog" aria-hidden="true">
+        <div class="modal-backdrop" id="modalBackdrop"></div>
+        <div class="modal-content" id="modalContent"></div>
+        <button class="modal-close" id="modalClose" aria-label="Cerrar">✕</button>
+    </div>
+
+    <!-- Settings panel -->
+    <div id="settingsPanel" class="settings-panel hidden">
+        <h3 class="text-lg font-semibold mb-2">Ajustes</h3>
+        <label class="flex items-center gap-3">
+            <span>Tema oscuro</span>
+            <input type="checkbox" id="themeToggle">
+        </label>
+    </div>
+
+    <script src="{% static 'js/list.js' %}" defer></script>
 
     {% block extra_js %}{% endblock %}
 </body>

@@ -1,0 +1,52 @@
+/* Estilos para la vista de lista, overlay, modal, dropdown y ajustes */
+:root{
+  --bg: #ffffff;
+  --fg: #0f1720;
+  --muted: #6b7280;
+  --accent: #4f46e5;
+}
+body.dark-theme{
+  --bg: #0b1220;
+  --fg: #e6eef6;
+  --muted: #9aa6b2;
+  --accent: #60a5fa;
+}
+body{ background:var(--bg); color:var(--fg); }
+
+/* Aplicar fondo y color globalmente (inputs, modals) */
+body.dark-theme, body.dark-theme input, body.dark-theme textarea, body.dark-theme select {
+  background: #07101a;
+  color: var(--fg);
+}
+body.dark-theme .modal-content{ background:#07101a; }
+body.dark-theme .user-menu .dropdown{ background:#07101a; border-color: rgba(255,255,255,0.04); }
+body.dark-theme .settings-panel{ background:#07101a; }
+
+/* Inputs */
+input, textarea, select { background: white; color: inherit; }
+body.dark-theme input, body.dark-theme textarea, body.dark-theme select { background: #0b1620; border-color: rgba(255,255,255,0.06); }
+
+/* Grid cards */
+.entry-card{ position:relative; overflow:hidden; border-radius:8px; }
+.entry-card img{ display:block; width:100%; height:160px; object-fit:cover; }
+.entry-card .overlay{ position:absolute; left:0; right:0; bottom:0; padding:8px; transform:translateY(40%); opacity:0; transition:all .18s ease; }
+.entry-card:hover .overlay, .entry-card:focus-within .overlay{ transform:translateY(0); opacity:1; }
+
+/* Modal */
+.modal.hidden{ display:none; }
+.modal{ position:fixed; inset:0; z-index:1200; display:flex; align-items:center; justify-content:center; }
+.modal-backdrop{ position:absolute; inset:0; background:rgba(0,0,0,.5); }
+.modal-content{ position:relative; z-index:1; background:var(--bg); color:var(--fg); width:min(900px,95%); max-height:85vh; overflow:auto; border-radius:10px; padding:20px; box-shadow:0 10px 30px rgba(0,0,0,.3); }
+.modal-close{ position:fixed; right:24px; top:24px; z-index:1300; background:transparent; border:0; color:var(--fg); font-size:20px; }
+
+/* Dropdown */
+.user-menu{ position:relative; }
+.user-menu .dropdown{ position:absolute; right:0; top:calc(100% + 6px); background:var(--bg); border:1px solid rgba(0,0,0,0.06); padding:6px; border-radius:8px; box-shadow:0 8px 20px rgba(0,0,0,.08); }
+.user-menu .dropdown.hidden{ display:none; }
+
+/* Settings panel */
+.settings-panel{ position:fixed; right:16px; top:72px; background:var(--bg); border-radius:8px; padding:12px; box-shadow:0 8px 24px rgba(0,0,0,.12); z-index:1300; }
+.settings-panel.hidden{ display:none; }
+
+/* Responsive */
+@media (max-width:520px){ .entry-card img{ height:120px; } .modal-content{ width:95%; height:90vh; } }
